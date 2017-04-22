@@ -1,0 +1,29 @@
+#!/bin/sh
+
+if [ $1 = "restore" ] 
+then
+    echo "Stopping the AEM instance"
+    ps aux|grep -i cq|awk '{print $2}'|head -1|xargs sudo kill -9
+    echo "Restoring the original AEM..."
+    rm -rf crx-quickstart
+    echo "Backing up existing AEM..."
+    tar xzf crx-quickstart.tar.gz
+    rm -f crx-quickstart.tar.gz
+    echo "Running the restored AEM..."
+    java -jar cq-author*.jar &
+elif [ $1 = "revert" ] 
+then
+    echo "Stopping the AEM instance"
+    ps aux|grep -i cq|awk '{print $2}'|head -1|xargs sudo kill -9
+    echo "Backing up the existing folders..."
+    rm -f crx-quickstart.tar.gz
+    tar czf crx-quickstart.tar.gz crx-quickstart
+    echo "Restoring the AEM now..."
+    java -jar RestoreTool.jar
+    echo "Running the Restored AEM"
+    java -jar cq-author*.jar & 
+else
+    echo "Usage: 'sh ./revertToBackup.sh revert' for reverting"
+    echo "       'sh ./revertToBackup.sh restore' for restoring"
+fi
+
